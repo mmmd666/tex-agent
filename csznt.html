@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧财税管理智能体 · 税法大作业</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --card:#ffffff; --ink:#1a2332; --muted:#5f6b7a;
+    --line:#e2e8f0; --accent:#0f4c81; --accent2:#1a6fb5;
+    --green:#0e7a4d; --amber:#9a6700; --red:#b42318; --purple:#5b3fa0;
+    --radius:12px; --shadow:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.65;font-size:14px}
+  .topbar{background:linear-gradient(135deg,#0b2f4f 0%,#0f4c81 55%,#1a6fb5 100%);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .mark{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:20px;font-weight:700}
+  .brand h1{font-size:17px;font-weight:650;letter-spacing:.3px}
+  .brand p{font-size:11.5px;opacity:.78}
+  .status-chip{font-size:11.5px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:5px 12px;border-radius:999px;display:flex;align-items:center;gap:6px}
+  .status-chip .dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.2)}
+  .layout{display:grid;grid-template-columns:232px 1fr;min-height:calc(100vh - 74px)}
+  .sidenav{background:var(--card);border-right:1px solid var(--line);padding:16px 10px;position:sticky;top:0;height:calc(100vh - 74px);overflow-y:auto}
+  .sidenav .group{font-size:10.5px;letter-spacing:.8px;color:var(--muted);padding:10px 12px 6px;text-transform:uppercase}
+  .nav-btn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;border-radius:9px;cursor:pointer;font-size:13.5px;color:var(--ink);transition:.15s}
+  .nav-btn:hover{background:#f0f4f9}
+  .nav-btn.active{background:#e8f0f9;color:var(--accent);font-weight:600}
+  .nav-btn .ico{width:20px;text-align:center;font-size:15px;opacity:.85}
+  .main{padding:26px 32px 60px;max-width:1180px}
+  .page{display:none;animation:fade .2s ease}
+  .page.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .page-head{margin-bottom:20px}
+  .page-head h2{font-size:20px;font-weight:680;letter-spacing:-.2px}
+  .page-head p{color:var(--muted);font-size:13px;margin-top:4px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;margin-bottom:16px}
+  .card h3{font-size:14.5px;font-weight:650;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .card h3 .badge{font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:999px;background:#eef2f7;color:var(--muted)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}.sidenav{position:static;height:auto;display:flex;flex-wrap:wrap;gap:4px;border-right:0;border-bottom:1px solid var(--line)}.sidenav .group{display:none}.nav-btn{width:auto}.grid2,.grid3{grid-template-columns:1fr}.main{padding:18px}}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+  input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;font-family:inherit;background:#fff;color:var(--ink);outline:none;transition:.15s}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(26,111,181,.1)}
+  .field{margin-bottom:12px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:8px;border:1px solid transparent;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#0d3f6b}
+  .btn-ghost{background:#fff;border-color:var(--line);color:var(--ink)}
+  .btn-ghost:hover{background:#f7f9fc}
+  .btn-sm{padding:6px 12px;font-size:12px}
+  .btn-green{background:var(--green);color:#fff}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{text-align:left;padding:9px 10px;background:#f7f9fc;border-bottom:1px solid var(--line);font-weight:600;color:var(--muted);font-size:11.5px;letter-spacing:.3px}
+  td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  .money{font-variant-numeric:tabular-nums;font-weight:600}
+  .pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:999px;font-weight:600;white-space:nowrap}
+  .pill-green{background:#e7f6ee;color:var(--green)}
+  .pill-amber{background:#fdf3dd;color:var(--amber)}
+  .pill-red{background:#fdecea;color:var(--red)}
+  .pill-blue{background:#e8f0f9;color:var(--accent)}
+  .pill-purple{background:#f0ebfa;color:var(--purple)}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  @media(max-width:900px){.kpi-row{grid-template-columns:1fr 1fr}}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+  .kpi .label{font-size:11.5px;color:var(--muted)}
+  .kpi .value{font-size:21px;font-weight:720;margin-top:4px;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+  .kpi .sub{font-size:11px;color:var(--muted);margin-top:3px}
+  .hint{font-size:12px;color:var(--muted);background:#f7f9fc;border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin-top:10px}
+  .alert{display:flex;gap:10px;padding:11px 14px;border-radius:9px;font-size:12.5px;margin-bottom:10px;align-items:flex-start}
+  .alert-red{background:#fdf1f0;border:1px solid #f5c6c2;color:#7a1f19}
+  .alert-amber{background:#fef8ec;border:1px solid #f0d59a;color:#6b4a05}
+  .alert-green{background:#eefaf3;border:1px solid #b7e4cd;color:#0a5c39}
+  .alert-blue{background:#eef4fb;border:1px solid #c2d8ef;color:#0b3a62}
+  .kg-wrap{position:relative;width:100%;height:420px;background:#fbfcfe;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .kg-svg{width:100%;height:100%;display:block}
+  .kg-node text{font-size:11px;font-family:inherit;pointer-events:none;user-select:none}
+  .kg-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:11.5px;color:var(--muted)}
+  .kg-legend span{display:inline-flex;align-items:center;gap:5px}
+  .kg-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .form-table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:9px;margin-top:8px}
+  .form-table-wrap table{min-width:620px}
+  .toast{position:fixed;right:20px;bottom:20px;background:#1a2332;color:#fff;padding:11px 18px;border-radius:9px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.18);opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;z-index:99;max-width:340px}
+  .toast.show{opacity:1;transform:none}
+  .notif-list{list-style:none}
+  .notif-list li{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+  .notif-list li:last-child{border-bottom:0}
+  .notif-list .tag{flex:0 0 auto;font-size:10.5px;font-weight:700;padding:1px 8px;border-radius:5px;height:fit-content;margin-top:1px}
+  .muted{color:var(--muted)}.small{font-size:11.5px}
+  .divider{height:1px;background:var(--line);margin:14px 0}
+  .tag-inline{display:inline-block;background:#f0f4f9;border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:11px;margin:2px 3px 2px 0;color:var(--muted)}
+  .empty{text-align:center;padding:30px 16px;color:var(--muted);font-size:13px}
+  .empty .big{font-size:28px;margin-bottom:8px;opacity:.35}
+  details summary{cursor:pointer;font-size:12.5px;color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="mark">税</div>
+    <div>
+      <h1>智慧财税管理智能体</h1>
+      <p>企业财税 · 自动计税 · 政策匹配 · 风险预警 · 知识图谱</p>
+    </div>
+  </div>
+  <div class="status-chip"><span class="dot"></span><span id="topStatus">就绪 · 数据本地存储</span></div>
+</div>
+
+<div class="layout">
+  <nav class="sidenav">
+    <div class="group">工作台</div>
+    <button class="nav-btn active" data-page="enterprise"><span class="ico">◈</span>企业画像与录入</button>
+    <button class="nav-btn" data-page="calculation"><span class="ico">∑</span>自动计税与勾稽校验</button>
+    <button class="nav-btn" data-page="policy"><span class="ico">◎</span>政策匹配与优惠测算</button>
+    <button class="nav-btn" data-page="risk"><span class="ico">⚠</span>涉税风险分析</button>
+    <div class="group">申报与输出</div>
+    <button class="nav-btn" data-page="declaration"><span class="ico">▤</span>多税种一键申报</button>
+    <button class="nav-btn" data-page="forms"><span class="ico">⎙</span>申报表生成与下载</button>
+    <div class="group">知识底座</div>
+    <button class="nav-btn" data-page="kg"><span class="ico">◇</span>税收知识图谱</button>
+    <button class="nav-btn" data-page="notifications"><span class="ico">🔔</span>政策更新与提醒</button>
+    <button class="nav-btn" data-page="about"><span class="ico">i</span>架构与说明</button>
+  </nav>
+
+  <main class="main">
+
+    <!-- 企业画像与录入 -->
+    <section class="page active" id="page-enterprise">
+      <div class="page-head">
+        <h2>企业画像与经营数据录入</h2>
+        <p>录入企业基础特征与经营数据，系统据此驱动计税、政策匹配与风险分析。</p>
+      </div>
+
+      <div class="card">
+        <h3>企业基础画像 <span class="badge">支持自动保存</span></h3>
+        <div class="grid3">
+          <div class="field"><label>企业名称</label><input id="f-name" placeholder="例：西安智云科技有限公司" value="西安智云科技有限公司"></div>
+          <div class="field"><label>所属行业</label>
+            <select id="f-industry">
+              <option>信息技术服务</option><option>制造业</option><option>批发零售</option>
+              <option>建筑业</option><option>交通运输</option><option>住宿餐饮</option><option>其他</option>
+            </select>
+          </div>
+          <div class="field"><label>增值税纳税人身份</label>
+            <select id="f-vatType">
+              <option value="small">小规模纳税人</option>
+              <option value="general">一般纳税人</option>
+            </select>
+          </div>
+          <div class="field"><label>企业所得税征收方式</label>
+            <select id="f-citMethod"><option value="audit">查账征收</option><option value="check">核定征收（简化演示）</option></select>
+          </div>
+          <div class="field"><label>从业人数（人）</label><input id="f-staff" type="number" value="20" min="1"></div>
+          <div class="field"><label>资产总额（万元）</label><input id="f-assets" type="number" value="800" min="0"></div>
+          <div class="field"><label>注册地/经营地</label>
+            <select id="f-region">
+              <option value="city">市区</option><option value="county">县城/镇</option><option value="other">其他地区</option>
+            </select>
+          </div>
+          <div class="field"><label>是否拥有自有房产（从价计征）</label>
+            <select id="f-hasHouse"><option value="no">否</option><option value="yes">是</option></select>
+          </div>
+          <div class="field"><label>自有房产原值（万元）</label><input id="f-houseValue" type="number" value="0" min="0"></div>
+          <div class="field"><label>是否有房屋出租（从租计征）</label>
+            <select id="f-hasRent"><option value="no">否</option><option value="yes">是</option></select>
+          </div>
+          <div class="field"><label>年租金收入（不含税，万元）</label><input id="f-rentIncome" type="number" value="0" min="0"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>经营与财务数据（本期/年度）</h3>
+        <div class="grid3">
+          <div class="field"><label>营业收入（不含税，万元）</label><input id="f-revenue" type="number" value="120" min="0" step="0.01"></div>
+          <div class="field"><label>营业成本（万元）</label><input id="f-cost" type="number" value="70" min="0" step="0.01"></div>
+          <div class="field"><label>期间费用合计（万元）</label><input id="f-expense" type="number" value="25" min="0" step="0.01"></div>
+          <div class="field"><label>进项税额（万元，一般纳税人填写）</label><input id="f-inputVat" type="number" value="6" min="0" step="0.01"></div>
+          <div class="field"><label>销项适用税率/征收率</label>
+            <select id="f-rate">
+              <option value="auto">自动判断</option>
+              <option value="0.13">13%</option><option value="0.09">9%</option>
+              <option value="0.06">6%</option><option value="0.03">3%</option><option value="0.01">1%</option>
+            </select>
+          </div>
+          <div class="field"><label>工资薪金总额（万元）</label><input id="f-wages" type="number" value="30" min="0" step="0.01"></div>
+          <div class="field"><label>买卖合同金额（万元，含税）</label><input id="f-salesContract" type="number" value="80" min="0" step="0.01"></div>
+          <div class="field"><label>借款合同金额（万元）</label><input id="f-loanContract" type="number" value="0" min="0" step="0.01"></div>
+          <div class="field"><label>上期/上年度营业收入（万元，用于风险对比）</label><input id="f-prevRevenue" type="number" value="100" min="0" step="0.01"></div>
+        </div>
+        <div class="hint">演示逻辑：金额单位统一为“万元”，系统在计算时换算为元。进项税额仅一般纳税人抵扣时使用；小规模纳税人默认简易计税。</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-saveEnterprise">保存企业数据</button>
+          <button class="btn btn-ghost" id="btn-resetDemo">恢复演示数据</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 自动计税与勾稽校验 -->
+    <section class="page" id="page-calculation">
+      <div class="page-head">
+        <h2>自动计税与勾稽校验</h2>
+        <p>依据企业画像与经营数据，按现行规则自动计算主要税种应纳税额，并执行跨税种勾稽校验。</p>
+      </div>
+
+      <div class="kpi-row" id="kpiRow">
+        <div class="kpi"><div class="label">增值税应纳税额</div><div class="value" id="kpi-vat">—</div><div class="sub" id="kpi-vatSub">等待数据</div></div>
+        <div class="kpi"><div class="label">企业所得税（估算）</div><div class="value" id="kpi-cit">—</div><div class="sub" id="kpi-citSub">等待数据</div></div>
+        <div class="kpi"><div class="label">附加税费合计</div><div class="value" id="kpi-surcharge">—</div><div class="sub">城建税+教育费附加+地方教育附加</div></div>
+        <div class="kpi"><div class="label">印花税（估算）</div><div class="value" id="kpi-stamp">—</div><div class="sub">买卖合同+借款合同</div></div>
+      </div>
+
+      <div class="card">
+        <h3>税种计算明细</h3>
+        <div style="overflow-x:auto">
+        <table id="calcTable">
+          <thead><tr><th>税种</th><th>计税依据</th><th>适用规则</th><th>应纳税额（元）</th><th>备注</th></tr></thead>
+          <tbody><tr><td colspan="5" class="empty"><div class="big">∑</div>请先在“企业画像与录入”保存数据</div></td></tr></tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>跨税种勾稽校验</h3>
+        <div id="reconcileBox"><div class="empty"><div class="big">⇄</div>保存企业数据后自动执行校验</div></div>
+      </div>
+
+      <div class="card">
+        <h3>人工复核调整</h3>
+        <p class="small muted" style="margin-bottom:10px">系统自动计算的结果允许在复核环节微调，调整将同步影响申报表与优惠测算。</p>
+        <div class="grid3">
+          <div class="field"><label>增值税调整额（元，正数增加/负数减少）</label><input id="adj-vat" type="number" value="0" step="0.01"></div>
+          <div class="field"><label>企业所得税调整额（元）</label><input id="adj-cit" type="number" value="0" step="0.01"></div>
+          <div class="field"><label>调整说明</label><input id="adj-note" placeholder="例：视同销售调整 / 纳税调增"></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="btn-applyAdj">应用复核调整</button>
+      </div>
+    </section>
+
+    <!-- 政策匹配 -->
+    <section class="page" id="page-policy">
+      <div class="page-head">
+        <h2>税收优惠政策匹配与测算</h2>
+        <p>基于企业画像与经营指标，自动区分已享受、可享受、暂不满足条件的政策，并测算减免金额。</p>
+      </div>
+      <div class="card">
+        <h3>政策匹配结果</h3>
+        <div id="policyBox"><div class="empty"><div class="big">◎</div>请先保存企业数据</div></div>
+      </div>
+      <div class="card">
+        <h3>留存备查资料提示</h3>
+        <div id="policyDocs"><div class="empty small">匹配到可享受政策后显示对应留存备查资料清单。</div></div>
+      </div>
+    </section>
+
+    <!-- 风险分析 -->
+    <section class="page" id="page-risk">
+      <div class="page-head">
+        <h2>涉税风险分析与合规建议</h2>
+        <p>模拟金税四期“以数治税”下的常见预警逻辑，对关键指标进行扫描并输出整改建议。</p>
+      </div>
+      <div class="kpi-row" id="riskKpiRow">
+        <div class="kpi"><div class="label">风险等级</div><div class="value" id="riskLevel">—</div><div class="sub">综合扫描结果</div></div>
+        <div class="kpi"><div class="label">命中预警项</div><div class="value" id="riskCount">—</div><div class="sub">项</div></div>
+        <div class="kpi"><div class="label">增值税税负率</div><div class="value" id="riskVatBurden">—</div><div class="sub">增值税/营业收入</div></div>
+        <div class="kpi"><div class="label">两税收入差异率</div><div class="value" id="riskIncomeDiff">—</div><div class="sub">增值税口径 vs 企税口径</div></div>
+      </div>
+      <div class="card">
+        <h3>风险扫描明细</h3>
+        <div id="riskList"><div class="empty"><div class="big">⚠</div>保存企业数据后自动扫描</div></div>
+      </div>
+    </section>
+
+    <!-- 多税种一键申报 -->
+    <section class="page" id="page-declaration">
+      <div class="page-head">
+        <h2>多税种一键申报</h2>
+        <p>将计算完成的各税种数据批量提交至“申报队列”，支持查询申报状态与归档状态。</p>
+      </div>
+      <div class="card">
+        <h3>申报队列</h3>
+        <div id="declQueue"><div class="empty"><div class="big">▤</div>尚未生成申报数据</div></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-batchDeclare">批量提交申报</button>
+          <button class="btn btn-ghost" id="btn-refreshQueue">刷新队列</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>申报状态查询</h3>
+        <div id="declStatusBox"><div class="empty small">提交后显示各税种申报状态。</div></div>
+      </div>
+    </section>
+
+    <!-- 申报表生成与下载 -->
+    <section class="page" id="page-forms">
+      <div class="page-head">
+        <h2>申报表生成与下载归档</h2>
+        <p>根据计算数据自动生成结构化申报表预览，支持下载为 CSV 文件归档。</p>
+      </div>
+      <div class="card">
+        <h3>增值税申报表（简表）</h3>
+        <div class="form-table-wrap"><table id="formVat"><thead></thead><tbody></tbody></table></div>
+        <div class="btn-row"><button class="btn btn-ghost btn-sm" data-download="vat">下载增值税申报表 CSV</button></div>
+      </div>
+      <div class="card">
+        <h3>企业所得税预缴申报表（简表）</h3>
+        <div class="form-table-wrap"><table id="formCit"><thead></thead><tbody></tbody></table></div>
+        <div class="btn-row"><button class="btn btn-ghost btn-sm" data-download="cit">下载企业所得税申报表 CSV</button></div>
+      </div>
+      <div class="card">
+        <h3>附加税费与印花税申报数据</h3>
+        <div class="form-table-wrap"><table id="formOther"><thead></thead><tbody></tbody></table></div>
+        <div class="btn-row"><button class="btn btn-ghost btn-sm" data-download="other">下载附加税及印花税数据 CSV</button></div>
+      </div>
+    </section>
+
+    <!-- 知识图谱 -->
+    <section class="page" id="page-kg">
+      <div class="page-head">
+        <h2>税收知识图谱</h2>
+        <p>以图谱形式展示税种、政策、表单、勾稽规则与风险点之间的关联，点击节点可查看说明。</p>
+      </div>
+      <div class="card">
+        <div class="kg-wrap"><svg class="kg-svg" id="kgSvg" viewBox="0 0 820 420"></svg></div>
+        <div class="kg-legend">
+          <span><i style="background:#0f4c81"></i>税种</span>
+          <span><i style="background:#1a6fb5"></i>申报表单</span>
+          <span><i style="background:#0e7a4d"></i>税收政策</span>
+          <span><i style="background:#b42318"></i>风险点</span>
+          <span><i style="background:#5b3fa0"></i>勾稽规则</span>
+        </div>
+        <div id="kgDetail" class="hint" style="margin-top:12px">点击图谱中的节点查看详细说明。</div>
+      </div>
+    </section>
+
+    <!-- 提醒 -->
+    <section class="page" id="page-notifications">
+      <div class="page-head">
+        <h2>政策更新与合规提醒</h2>
+        <p>展示政策变动、申报期限与涉税风险事项的站内提醒。</p>
+      </div>
+      <div class="card">
+        <h3>站内提醒</h3>
+        <ul class="notif-list" id="notifList"></ul>
+      </div>
+    </section>
+
+    <!-- 架构说明 -->
+    <section class="page" id="page-about">
+      <div class="page-head">
+        <h2>系统架构与说明</h2>
+      </div>
+      <div class="card">
+        <h3>分层架构映射</h3>
+        <table>
+          <thead><tr><th>架构分层</th><th>本网页实现方式</th></tr></thead>
+          <tbody>
+            <tr><td>税收知识图谱</td><td>内置税种—政策—表单—风险—勾稽规则节点及边关系，SVG 可视化展示，点击可溯源查看说明。</td></tr>
+            <tr><td>NLP 自然语言处理</td><td>以结构化录入代替完整 NLP 抽取，演示“政策文本→结构化规则”的映射逻辑；录入字段即为抽取后的结构化要素。</td></tr>
+            <tr><td>机器学习</td><td>风险模块采用规则引擎 + 加权评分模拟风险预测；指标阈值参考常见预警口径（如两税收入差异 10%）。</td></tr>
+            <tr><td>数据采集</td><td>企业画像与经营数据表单采集；申报表、政策库、风险规则为内置模拟数据。</td></tr>
+            <tr><td>数据处理</td><td>前端统一换算口径（万元→元）、校验必填与数值合理性、执行勾稽校验。</td></tr>
+            <tr><td>应用输出</td><td>申报数据、申报表预览与 CSV 下载、风险报告、政策匹配与减免测算、站内提醒。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>数据流程</h3>
+        <p class="small muted">录入 → 本地存储（localStorage）→ 自动计税 → 勾稽校验 → 政策匹配 → 风险扫描 → 申报队列 → 表单生成与下载。全部计算在浏览器端完成，无后端依赖，适合作为可公网访问的原型。</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= 数据与工具 ================= */
+const STORE_KEY = 'tax_agent_state_v1';
+const W = 10000; // 万元 → 元
+
+const demo = {
+  name:'西安智云科技有限公司', industry:'信息技术服务', vatType:'small', citMethod:'audit',
+  staff:20, assets:800, region:'city', hasHouse:'no', houseValue:0, hasRent:'no', rentIncome:0,
+  revenue:120, cost:70, expense:25, inputVat:6, rate:'auto', wages:30,
+  salesContract:80, loanContract:0, prevRevenue:100,
+  adjVat:0, adjCit:0, adjNote:'',
+  declared:false, declareTime:''
+};
+
+let state = load();
+let calcResult = null;
+let adjustments = { vat:0, cit:0 };
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw) return Object.assign({}, demo, JSON.parse(raw));
+  }catch(e){}
+  return Object.assign({}, demo);
+}
+function save(){
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+}
+function num(id){ const el=document.getElementById(id); return el ? (parseFloat(el.value)||0) : 0; }
+function money(n){ return (n||0).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function pct(n){ return (n*100).toFixed(2)+'%'; }
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ================= 页面切换 ================= */
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    const id = 'page-'+btn.dataset.page;
+    const el = document.getElementById(id);
+    if(el) el.classList.add('active');
+    if(btn.dataset.page==='kg') renderKG();
+    if(btn.dataset.page==='notifications') renderNotifications();
+  });
+});
+
+/* ================= 企业数据读写 ================= */
+function fillForm(){
+  const map = {
+    'f-name':'name','f-industry':'industry','f-vatType':'vatType','f-citMethod':'citMethod',
+    'f-staff':'staff','f-assets':'assets','f-region':'region','f-hasHouse':'hasHouse',
+    'f-houseValue':'houseValue','f-hasRent':'hasRent','f-rentIncome':'rentIncome',
+    'f-revenue':'revenue','f-cost':'cost','f-expense':'expense','f-inputVat':'inputVat',
+    'f-rate':'rate','f-wages':'wages','f-salesContract':'salesContract',
+    'f-loanContract':'loanContract','f-prevRevenue':'prevRevenue'
+  };
+  Object.keys(map).forEach(id=>{ const el=document.getElementById(id); if(el) el.value = state[map[id]]; });
+}
+function readForm(){
+  state.name = document.getElementById('f-name').value.trim() || demo.name;
+  state.industry = document.getElementById('f-industry').value;
+  state.vatType = document.getElementById('f-vatType').value;
+  state.citMethod = document.getElementById('f-citMethod').value;
+  state.staff = num('f-staff'); state.assets = num('f-assets');
+  state.region = document.getElementById('f-region').value;
+  state.hasHouse = document.getElementById('f-hasHouse').value;
+  state.houseValue = num('f-houseValue');
+  state.hasRent = document.getElementById('f-hasRent').value;
+  state.rentIncome = num('f-rentIncome');
+  state.revenue = num('f-revenue'); state.cost = num('f-cost');
+  state.expense = num('f-expense'); state.inputVat = num('f-inputVat');
+  state.rate = document.getElementById('f-rate').value;
+  state.wages = num('f-wages');
+  state.salesContract = num('f-salesContract');
+  state.loanContract = num('f-loanContract');
+  state.prevRevenue = num('f-prevRevenue');
+  save();
+}
+
+/* ================= 计税核心 ================= */
+function effectiveRate(){
+  if(state.vatType==='small') return 0.01; // 2026-2027 小规模减按1%
+  if(state.rate!=='auto') return parseFloat(state.rate);
+  if(state.industry==='制造业'||state.industry==='批发零售') return 0.13;
+  if(state.industry==='建筑业'||state.industry==='交通运输') return 0.09;
+  return 0.06;
+}
+function isSmallLowProfit(){
+  const taxable = state.revenue - state.cost - state.expense;
+  return state.industry!=='其他' && state.staff<=300 && state.assets<=5000 && taxable<=300;
+}
+function compute(){
+  const revY = state.revenue * W;
+  const rate = effectiveRate();
+  let vat = 0, vatNote = '';
+  if(state.vatType==='small'){
+    const threshold = 10 * W; // 月销售额10万元，演示按年度简化处理：月度口径仅作示意
+    // 为演示合理，按年度数据时用“季度起征点30万元”的简化逻辑：年收入≤120万视为月均≤10万
+    if(state.revenue <= 120){
+      vat = 0; vatNote = '月销售额≤10万元，符合小规模起征点免税（演示口径）';
+    }else{
+      vat = revY * rate; vatNote = '减按1%征收率（2026-2027衔接政策）';
+    }
+  }else{
+    const output = revY * rate;
+    const input = state.inputVat * W;
+    vat = Math.max(output - input, 0);
+    vatNote = `销项 ${money(output)} − 进项 ${money(input)}`;
+  }
+
+  const surchargeBase = Math.max(vat,0);
+  const cityRate = state.region==='city'?0.07:(state.region==='county'?0.05:0.01);
+  const surcharge = surchargeBase * (cityRate + 0.03 + 0.02);
+
+  const stampSales = state.salesContract * W * 0.0003;
+  const stampLoan = state.loanContract * W * 0.000005;
+  const stamp = stampSales + stampLoan;
+
+  const taxableBefore = state.revenue - state.cost - state.expense;
+  let cit = 0, citNote='';
+  if(taxableBefore<=0){ cit=0; citNote='亏损或应纳税所得额≤0'; }
+  else if(isSmallLowProfit()){
+    cit = taxableBefore * W * 0.25 * 0.20;
+    citNote = '小型微利企业：减按25%计入应纳税所得额，20%税率（实际税负5%）';
+  }else{
+    cit = taxableBefore * W * 0.25;
+    citNote = '标准税率25%';
+  }
+
+  let house=0, houseNote='';
+  if(state.hasHouse==='yes' && state.houseValue>0){
+    house = state.houseValue * W * 0.7 * 0.012;
+    houseNote = '从价计征：原值×(1−30%)×1.2%';
+  }
+  if(state.hasRent==='yes' && state.rentIncome>0){
+    const rentTax = state.rentIncome * W * 0.12;
+    house += rentTax;
+    houseNote += (houseNote?'；':'') + '从租计征：租金×12%';
+  }
+
+  const total = vat + surcharge + stamp + cit + house;
+  return {
+    revY, rate, vat, vatNote, surcharge, cityRate,
+    stamp, stampSales, stampLoan,
+    taxableBefore, cit, citNote,
+    house, houseNote, total,
+    adjustedVat: Math.max(vat + adjustments.vat, 0),
+    adjustedCit: Math.max(cit + adjustments.cit, 0)
+  };
+}
+
+/* ================= 渲染计税 ================= */
+function renderCalculation(){
+  if(!state.revenue && !state.name){ return; }
+  calcResult = compute();
+  const r = calcResult;
+
+  document.getElementById('kpi-vat').textContent = money(r.adjustedVat);
+  document.getElementById('kpi-vatSub').textContent = r.vatNote;
+  document.getElementById('kpi-cit').textContent = money(r.adjustedCit);
+  document.getElementById('kpi-citSub').textContent = r.citNote;
+  document.getElementById('kpi-surcharge').textContent = money(r.surcharge);
+  document.getElementById('kpi-stamp').textContent = money(r.stamp);
+
+  const rows = [
+    ['增值税','营业收入（不含税）', r.vatNote, r.adjustedVat, state.vatType==='small'?'简易计税':'一般计税'],
+    ['城市维护建设税','实际缴纳增值税', `税率 ${(r.cityRate*100).toFixed(0)}%（${state.region==='city'?'市区':state.region==='county'?'县城/镇':'其他'}）`, r.surcharge*r.cityRate/(r.cityRate+0.05), '附加税费'],
+    ['教育费附加','实际缴纳增值税','3%', r.surcharge*0.03/(r.cityRate+0.05), '附加税费'],
+    ['地方教育附加','实际缴纳增值税','2%', r.surcharge*0.02/(r.cityRate+0.05), '附加税费'],
+    ['企业所得税','应纳税所得额（估算）', r.citNote, r.adjustedCit, '预缴估算'],
+    ['印花税（买卖）','买卖合同金额','万分之三', r.stampSales, '动产买卖合同'],
+    ['印花税（借款）','借款合同金额','万分之零点五', r.stampLoan, '金融机构借款合同'],
+    ['房产税', state.hasHouse==='yes'||state.hasRent==='yes'?'房产原值/租金':'未启用', r.houseNote||'未启用', r.house, '从价/从租']
+  ];
+  const tbody = document.querySelector('#calcTable tbody');
+  tbody.innerHTML = rows.map(row=>`<tr>
+    <td><strong>${row[0]}</strong></td><td>${row[1]}</td><td class="small muted">${row[2]}</td>
+    <td class="money">${money(row[3])}</td><td class="small">${row[4]}</td></tr>`).join('');
+
+  renderReconcile(r);
+  renderForms(r);
+}
+
+function renderReconcile(r){
+  const box = document.getElementById('reconcileBox');
+  const checks = [];
+  // 1. 两税收入差异（演示：增值税口径≈营业收入，企税口径≈营业收入；此处用同一口径，差异为0，但展示逻辑）
+  const vatSales = state.revenue; // 演示口径
+  const citRev = state.revenue;
+  const diffRate = vatSales>0 ? Math.abs(vatSales-citRev)/vatSales : 0;
+  checks.push({
+    name:'增值税销售额与企业所得税收入差异',
+    value: pct(diffRate),
+    pass: diffRate<=0.10,
+    note: diffRate<=0.10 ? '差异在10%以内，属合理口径范围' : '差异超过10%，需准备差异说明台账'
+  });
+  // 2. 附加税费计税依据 = 增值税
+  const surBaseOk = Math.abs(r.surcharge - r.adjustedVat*(r.cityRate+0.05)) < 1;
+  checks.push({name:'附加税费计税依据与增值税勾稽', value: surBaseOk?'一致':'不一致', pass: surBaseOk, note:'城建税及附加以实际缴纳增值税为计税依据'});
+  // 3. 印花税合同口径
+  const stampOk = r.stamp >= 0;
+  checks.push({name:'印花税合同计税依据校验', value: r.stamp>0?'已识别合同':'无合同金额', pass: stampOk, note:'买卖合同万分之三，借款合同万分之零点五'});
+  // 4. 小型微利条件
+  if(isSmallLowProfit()){
+    checks.push({name:'小型微利企业条件校验', value:'满足', pass:true, note:'应纳税所得额≤300万、人数≤300、资产≤5000万'});
+  }else{
+    checks.push({name:'小型微利企业条件校验', value:'不满足/不适用', pass:false, note:'按25%标准税率估算企业所得税'});
+  }
+  box.innerHTML = checks.map(c=>`
+    <div class="alert ${c.pass?'alert-green':'alert-amber'}" style="margin-bottom:8px">
+      <span>${c.pass?'✓':'!'}</span>
+      <div><strong>${c.name}</strong> · 当前值：${c.value}<br><span class="small">${c.note}</span></div>
+    </div>`).join('');
+}
+
+/* ================= 政策匹配 ================= */
+const policies = [
+  {
+    id:'p1', name:'小规模纳税人减按1%征收率', tag:'增值税',
+    condition: s => s.vatType==='small',
+    benefit: s => {
+      const r = compute();
+      const normal = s.revenue*W*0.03;
+      return Math.max(normal - r.adjustedVat, 0);
+    },
+    docs:['增值税申报表','减免税明细表','销售额台账'],
+    reason: s => s.vatType==='small' ? '已享受：适用3%征收率减按1%' : '暂不满足：仅小规模纳税人适用'
+  },
+  {
+    id:'p2', name:'小规模纳税人月销售额10万元以下免征增值税', tag:'增值税',
+    condition: s => s.vatType==='small' && s.revenue<=120,
+    benefit: s => s.vatType==='small' ? s.revenue*W*0.01 : 0,
+    docs:['增值税申报表','销售额明细'],
+    reason: s => (s.vatType==='small' && s.revenue<=120) ? '可享受：年收入折合月均≤10万元（演示口径）' : (s.vatType==='small'?'暂不满足：收入超过起征点':'暂不满足：非小规模纳税人')
+  },
+  {
+    id:'p3', name:'小型微利企业所得税优惠（实际税负5%）', tag:'企业所得税',
+    condition: s => isSmallLowProfit(),
+    benefit: s => {
+      const t = s.revenue - s.cost - s.expense;
+      if(t<=0) return 0;
+      return t*W*0.25 - t*W*0.25*0.20;
+    },
+    docs:['企业所得税预缴申报表','从业人数证明','资产总额证明','应纳税所得额计算表'],
+    reason: s => isSmallLowProfit() ? '可享受：同时满足应纳税所得额≤300万、人数≤300、资产≤5000万' : '暂不满足：未同时满足小型微利企业三项条件'
+  },
+  {
+    id:'p4', name:'增值税小规模纳税人“六税两费”减半征收（演示提示）', tag:'附加税费',
+    condition: s => s.vatType==='small',
+    benefit: s => 0,
+    docs:['减免税申报明细','纳税人身份证明'],
+    reason: s => s.vatType==='small' ? '可关注：小规模纳税人可享受资源税、城建税、印花税等减半征收（具体以当地口径为准，演示中未计入减免额）' : '暂不满足：仅小规模纳税人'
+  }
+];
+
+function renderPolicy(){
+  const box = document.getElementById('policyBox');
+  const docsBox = document.getElementById('policyDocs');
+  if(!state.name){ box.innerHTML='<div class="empty">请先保存企业数据</div>'; return; }
+  const rows = policies.map(p=>{
+    const cond = p.condition(state);
+    const reason = p.reason(state);
+    const benefit = cond ? p.benefit(state) : 0;
+    let status, cls;
+    if(cond){ status='可享受'; cls='pill-green'; }
+    else if(reason.includes('暂不满足')){ status='暂不满足'; cls='pill-amber'; }
+    else { status='已享受/需复核'; cls='pill-blue'; }
+    if(p.id==='p1' && state.vatType==='small'){ status='已享受'; cls='pill-green'; }
+    return {p,status,cls,reason,benefit,cond};
+  });
+  box.innerHTML = `<div style="overflow-x:auto"><table>
+    <thead><tr><th>政策</th><th>适配状态</th><th>判断依据</th><th>测算减免（元）</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td><strong>${r.p.name}</strong><br><span class="small muted">${r.p.tag}</span></td>
+      <td><span class="pill ${r.cls}">${r.status}</span></td>
+      <td class="small">${r.reason}</td>
+      <td class="money">${r.cond?money(r.benefit):'—'}</td>
+    </tr>`).join('')}</tbody></table></div>`;
+
+  const active = rows.filter(r=>r.cond);
+  if(active.length===0){ docsBox.innerHTML='<div class="empty small">当前没有匹配到的可享受政策。</div>'; return; }
+  docsBox.innerHTML = active.map(r=>`
+    <div style="margin-bottom:12px">
+      <strong style="font-size:13px">${r.p.name}</strong>
+      <div style="margin-top:5px">${r.p.docs.map(d=>`<span class="tag-inline">${d}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+/* ================= 风险分析 ================= */
+function computeRisk(){
+  const r = calcResult || compute();
+  const issues = [];
+  const rev = state.revenue*W;
+  const vatBurden = rev>0 ? r.adjustedVat/rev : 0;
+  const citBurden = rev>0 ? r.adjustedCit/rev : 0;
+  const prev = state.prevRevenue*W;
+  const growth = prev>0 ? (rev-prev)/prev : 0;
+
+  // 1. 两税收入差异（演示口径差异为0，但保留规则说明）
+  const diff = 0; // 同一营业收入口径
+  if(diff>0.10) issues.push({level:'red',name:'两税收入差异超过10%',advice:'准备增值税与企税收入差异明细台账，说明预收、视同销售等口径差异。'});
+  else issues.push({level:'green',name:'两税收入差异在合理区间',advice:'当前演示数据下增值税与企业所得税收入口径一致，差异率0%。'});
+
+  // 2. 增值税税负率异常
+  if(state.vatType==='general'){
+    if(vatBurden<0.005) issues.push({level:'red',name:'增值税税负率显著偏低',advice:'一般纳税人税负率长期低于0.5%易触发预警，核查进项抵扣与收入完整性。'});
+    else if(vatBurden<0.015) issues.push({level:'amber',name:'增值税税负率偏低',advice:'关注行业预警值，确保进销匹配、进项真实。'});
+    else issues.push({level:'green',name:'增值税税负率处于正常参考区间',advice:'继续维持进销项匹配。'});
+  }else{
+    issues.push({level:'blue',name:'小规模纳税人简易计税',advice:'小规模纳税人按征收率计税，重点关注起征点与减免衔接。'});
+  }
+
+  // 3. 收入波动
+  if(Math.abs(growth)>0.30) issues.push({level:'amber',name:'营业收入变动幅度较大',advice:`本期较上期变动 ${(growth*100).toFixed(1)}%，准备收入变动说明及业务合同备查。`});
+  else issues.push({level:'green',name:'营业收入变动幅度正常',advice:'变动幅度在30%以内。'});
+
+  // 4. 工资与社保/个税（演示提示）
+  issues.push({level:'blue',name:'工资、个税、社保数据一致性提示',advice:'金税四期下工资薪金总额与个税申报、社保基数差异超过10%易触发预警，建议定期三方核对。'});
+
+  // 5. 发票品名与业务实质
+  issues.push({level:'blue',name:'发票品名与业务实质匹配提示',advice:'进销项品名、商品编码应与合同及业务实质一致，避免笼统开票。'});
+
+  // 6. 小型微利条件临界
+  const taxable = state.revenue-state.cost-state.expense;
+  if(taxable>270 && taxable<=300 && isSmallLowProfit()){
+    issues.push({level:'amber',name:'小型微利企业应纳税所得额接近300万元临界点',advice:'超过300万元将不再符合小型微利条件，税负可能跳升，建议提前规划。'});
+  }
+
+  const reds = issues.filter(i=>i.level==='red').length;
+  const ambers = issues.filter(i=>i.level==='amber').length;
+  let level = '低风险';
+  if(reds>0) level='高风险';
+  else if(ambers>0) level='中风险';
+  return {issues, level, reds, ambers, vatBurden, citBurden, growth, diff};
+}
+
+function renderRisk(){
+  if(!state.name) return;
+  const risk = computeRisk();
+  document.getElementById('riskLevel').textContent = risk.level;
+  document.getElementById('riskCount').textContent = risk.reds + risk.ambers;
+  document.getElementById('riskVatBurden').textContent = pct(risk.vatBurden);
+  document.getElementById('riskIncomeDiff').textContent = pct(risk.diff);
+
+  const list = document.getElementById('riskList');
+  list.innerHTML = risk.issues.map(i=>{
+    const cls = i.level==='red'?'alert-red':i.level==='amber'?'alert-amber':i.level==='green'?'alert-green':'alert-blue';
+    const label = i.level==='red'?'高':i.level==='amber'?'中':i.level==='green'?'低':'提示';
+    return `<div class="alert ${cls}"><span>${label}</span><div><strong>${i.name}</strong><br><span class="small">${i.advice}</span></div></div>`;
+  }).join('');
+}
+
+/* ================= 申报队列 ================= */
+function renderDeclaration(){
+  const box = document.getElementById('declQueue');
+  const statusBox = document.getElementById('declStatusBox');
+  if(!calcResult){ box.innerHTML='<div class="empty"><div class="big">▤</div>请先在“自动计税”页生成计算结果</div>'; return; }
+  const r = calcResult;
+  const items = [
+    {name:'增值税', amount:r.adjustedVat, period:'本期'},
+    {name:'城市维护建设税', amount:r.surcharge*r.cityRate/(r.cityRate+0.05), period:'本期'},
+    {name:'教育费附加', amount:r.surcharge*0.03/(r.cityRate+0.05), period:'本期'},
+    {name:'地方教育附加', amount:r.surcharge*0.02/(r.cityRate+0.05), period:'本期'},
+    {name:'企业所得税', amount:r.adjustedCit, period:'本期/季度'},
+    {name:'印花税', amount:r.stamp, period:'本期'},
+  ];
+  if(r.house>0) items.push({name:'房产税', amount:r.house, period:'本期'});
+
+  box.innerHTML = `<div style="overflow-x:auto"><table>
+    <thead><tr><th>税种</th><th>税款所属期</th><th>应纳税额（元）</th><th>状态</th></tr></thead>
+    <tbody>${items.map(i=>`<tr><td><strong>${i.name}</strong></td><td>${i.period}</td><td class="money">${money(i.amount)}</td><td><span class="pill ${state.declared?'pill-green':'pill-amber'}">${state.declared?'已提交':'待提交'}</span></td></tr>`).join('')}</tbody></table></div>`;
+
+  if(state.declared){
+    statusBox.innerHTML = `<div class="alert alert-green"><span>✓</span><div>已于 ${state.declareTime||'—'} 批量提交 ${items.length} 个税种，当前状态：<strong>已受理（演示）</strong>。申报表可在“申报表生成与下载”页下载归档。</div></div>`;
+  }else{
+    statusBox.innerHTML = `<div class="alert alert-blue"><span>i</span><div>尚未提交。点击“批量提交申报”模拟提交至申报队列。</div></div>`;
+  }
+}
+
+document.getElementById('btn-batchDeclare').addEventListener('click',()=>{
+  if(!calcResult){ toast('请先生成计税结果'); return; }
+  state.declared = true;
+  state.declareTime = new Date().toLocaleString('zh-CN');
+  save(); renderDeclaration();
+  toast('已批量提交申报（演示）');
+});
+document.getElementById('btn-refreshQueue').addEventListener('click',renderDeclaration);
+
+/* ================= 申报表生成与下载 ================= */
+function renderForms(r){
+  if(!r) return;
+  const vatRows = state.vatType==='small' ? [
+    ['项目','栏次','金额（元）'],
+    ['应征增值税不含税销售额','1', money(state.revenue*W)],
+    ['本期应纳税额','2', money(r.adjustedVat)],
+    ['本期应补（退）税额','3', money(r.adjustedVat)],
+    ['减免税额','4', money(Math.max(state.revenue*W*0.01 - r.adjustedVat,0))]
+  ] : [
+    ['项目','栏次','金额（元）'],
+    ['销项税额','1', money(state.revenue*W*r.rate)],
+    ['进项税额','2', money(state.inputVat*W)],
+    ['应纳税额','3', money(r.adjustedVat)],
+    ['期末留抵税额','4', money(Math.max(state.inputVat*W - state.revenue*W*r.rate,0))]
+  ];
+  document.querySelector('#formVat thead').innerHTML = `<tr>${vatRows[0].map(h=>`<th>${h}</th>`).join('')}</tr>`;
+  document.querySelector('#formVat tbody').innerHTML = vatRows.slice(1).map(row=>`<tr>${row.map(c=>`<td class="${c.includes(',')||!isNaN(parseFloat(c.replace(/,/g,'')))?'money':''}">${c}</td>`).join('')}</tr>`).join('');
+
+  const citRows = [
+    ['项目','金额（元）'],
+    ['营业收入', money(state.revenue*W)],
+    ['营业成本', money(state.cost*W)],
+    ['期间费用', money(state.expense*W)],
+    ['应纳税所得额（估算）', money(Math.max(r.taxableBefore*W,0))],
+    ['减免税额（小型微利）', money(Math.max(r.cit>0 && isSmallLowProfit()? r.taxableBefore*W*0.25 - r.adjustedCit:0,0))],
+    ['实际应纳所得税额', money(r.adjustedCit)]
+  ];
+  document.querySelector('#formCit thead').innerHTML = `<tr>${citRows[0].map(h=>`<th>${h}</th>`).join('')}</tr>`;
+  document.querySelector('#formCit tbody').innerHTML = citRows.slice(1).map(row=>`<tr><td>${row[0]}</td><td class="money">${row[1]}</td></tr>`).join('');
+
+  const otherRows = [
+    ['税种','计税依据（元）','税额（元）'],
+    ['城市维护建设税', money(r.adjustedVat), money(r.surcharge*r.cityRate/(r.cityRate+0.05))],
+    ['教育费附加', money(r.adjustedVat), money(r.surcharge*0.03/(r.cityRate+0.05))],
+    ['地方教育附加', money(r.adjustedVat), money(r.surcharge*0.02/(r.cityRate+0.05))],
+    ['印花税（买卖）', money(state.salesContract*W), money(r.stampSales)],
+    ['印花税（借款）', money(state.loanContract*W), money(r.stampLoan)]
+  ];
+  if(r.house>0) otherRows.push(['房产税', '原值/租金', money(r.house)]);
+  document.querySelector('#formOther thead').innerHTML = `<tr>${otherRows[0].map(h=>`<th>${h}</th>`).join('')}</tr>`;
+  document.querySelector('#formOther tbody').innerHTML = otherRows.slice(1).map(row=>`<tr>${row.map((c,i)=>`<td class="${i>0?'money':''}">${c}</td>`).join('')}</tr>`).join('');
+}
+
+function downloadCSV(type){
+  const r = calcResult || compute();
+  let rows, filename;
+  if(type==='vat'){
+    filename = `增值税申报表_${state.name}.csv`;
+    rows = state.vatType==='small' ? [
+      ['项目','金额（元）'],['应征增值税不含税销售额',state.revenue*W],['本期应纳税额',r.adjustedVat],['减免税额',Math.max(state.revenue*W*0.01-r.adjustedVat,0)]
+    ] : [['项目','金额（元）'],['销项税额',state.revenue*W*r.rate],['进项税额',state.inputVat*W],['应纳税额',r.adjustedVat]];
+  }else if(type==='cit'){
+    filename = `企业所得税预缴申报表_${state.name}.csv`;
+    rows = [['项目','金额（元）'],['营业收入',state.revenue*W],['营业成本',state.cost*W],['期间费用',state.expense*W],['应纳税所得额',Math.max(r.taxableBefore*W,0)],['实际应纳所得税额',r.adjustedCit]];
+  }else{
+    filename = `附加税费及印花税_${state.name}.csv`;
+    rows = [['税种','税额（元）'],['城市维护建设税',r.surcharge*r.cityRate/(r.cityRate+0.05)],['教育费附加',r.surcharge*0.03/(r.cityRate+0.05)],['地方教育附加',r.surcharge*0.02/(r.cityRate+0.05)],['印花税',r.stamp],['房产税',r.house]];
+  }
+  const csv = '\uFEFF' + rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  URL.revokeObjectURL(a.href);
+  toast('已下载：'+filename);
+}
+document.querySelectorAll('[data-download]').forEach(btn=>{
+  btn.addEventListener('click',()=>downloadCSV(btn.dataset.download));
+});
+
+/* ================= 知识图谱 ================= */
+const kgData = {
+  nodes:[
+    {id:'vat',label:'增值税',group:'tax',x:150,y:100,detail:'增值税：一般纳税人适用13%/9%/6%，小规模纳税人2026-2027年减按1%征收率，月销售额10万元以下免征。'},
+    {id:'cit',label:'企业所得税',group:'tax',x:380,y:80,detail:'企业所得税：标准税率25%；小型微利企业减按25%计入应纳税所得额、20%税率，实际税负5%（至2027年底）。'},
+    {id:'surcharge',label:'附加税费',group:'tax',x:150,y:240,detail:'城建税7%/5%/1%，教育费附加3%，地方教育附加2%，以实际缴纳的增值税、消费税为计税依据。'},
+    {id:'stamp',label:'印花税',group:'tax',x:380,y:250,detail:'买卖合同万分之三，借款合同万分之零点五，营业账簿等按税目表执行。'},
+    {id:'house',label:'房产税',group:'tax',x:580,y:160,detail:'从价计征：原值×(1−10%~30%)×1.2%；从租计征：租金×12%。'},
+    {id:'pSmallVat',label:'小规模1%',group:'policy',x:70,y:40,detail:'小规模纳税人3%征收率减按1%，执行至2027年12月31日。'},
+    {id:'pThreshold',label:'起征点10万',group:'policy',x:250,y:25,detail:'月销售额10万元以下免征增值税（小规模纳税人）。'},
+    {id:'pSmallCit',label:'小微5%',group:'policy',x:500,y:25,detail:'小型微利企业：应纳税所得额≤300万、人数≤300、资产≤5000万，实际税负5%。'},
+    {id:'fVat',label:'增值税申报表',group:'form',x:70,y:170,detail:'增值税及附加税费申报表（小规模/一般纳税人适用）。'},
+    {id:'fCit',label:'企税预缴表A类',group:'form',x:500,y:120,detail:'企业所得税月（季）度预缴纳税申报表（A类）。'},
+    {id:'fSurcharge',label:'附加税费申报',group:'form',x:70,y:310,detail:'附加税费随增值税申报表附列资料一并申报。'},
+    {id:'rIncome',label:'两税收入差异>10%',group:'risk',x:660,y:80,detail:'增值税销售额与企业所得税收入差异超过10%为高风险预警指标。'},
+    {id:'rBurden',label:'税负率异常',group:'risk',x:680,y:250,detail:'增值税税负率显著低于行业参考值易触发预警。'},
+    {id:'rWage',label:'工资/社保/个税不一致',group:'risk',x:600,y:330,detail:'工资薪金、个税申报与社保基数差异超过10%易触发预警。'},
+    {id:'cSur',label:'附加税以增值税为基',group:'rule',x:260,y:330,detail:'勾稽规则：附加税费合计=增值税×(城建税率+3%+2%)。'},
+    {id:'cIncome',label:'收入口径勾稽',group:'rule',x:520,y:330,detail:'勾稽规则：增值税销售额与企税收入差异应≤10%，超出需说明。'},
+  ],
+  edges:[
+    ['vat','fVat'],['cit','fCit'],['surcharge','fSurcharge'],
+    ['vat','surcharge'],['vat','pSmallVat'],['vat','pThreshold'],
+    ['cit','pSmallCit'],['pSmallVat','pThreshold'],
+    ['rIncome','vat'],['rIncome','cit'],['rBurden','vat'],['rWage','cit'],
+    ['cSur','vat'],['cSur','surcharge'],['cIncome','vat'],['cIncome','cit'],
+    ['fVat','vat'],['fCit','cit'],['vat','rIncome'],['cit','rIncome'],
+    ['pSmallVat','vat'],['pSmallCit','cit']
+  ]
+};
+function renderKG(){
+  const svg = document.getElementById('kgSvg');
+  const color = {tax:'#0f4c81',policy:'#0e7a4d',form:'#1a6fb5',risk:'#b42318',rule:'#5b3fa0'};
+  const r = 13;
+  const nodeMap = {};
+  kgData.nodes.forEach(n=>nodeMap[n.id]=n);
+  let html = '';
+  // edges
+  kgData.edges.forEach(([a,b])=>{
+    const na=nodeMap[a], nb=nodeMap[b];
+    if(!na||!nb) return;
+    html += `<line x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" stroke="#c9d4e0" stroke-width="1.2" opacity=".7"/>`;
+  });
+  // nodes
+  kgData.nodes.forEach(n=>{
+    const c = color[n.group]||'#666';
+    html += `<g class="kg-node" data-node="${n.id}" style="cursor:pointer">
+      <circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${c}" opacity=".92" stroke="#fff" stroke-width="2"/>
+      <text x="${n.x}" y="${n.y+r+13}" text-anchor="middle" fill="#334" font-size="11">${n.label}</text>
+    </g>`;
+  });
+  svg.innerHTML = html;
+  svg.querySelectorAll('[data-node]').forEach(g=>{
+    g.addEventListener('click',()=>{
+      const n = nodeMap[g.dataset.node];
+      if(n) document.getElementById('kgDetail').innerHTML = `<strong>${n.label}</strong>（${n.group==='tax'?'税种':n.group==='policy'?'政策':n.group==='form'?'表单':n.group==='risk'?'风险点':'勾稽规则'}）<br>${n.detail}`;
+    });
+  });
+}
+
+/* ================= 提醒 ================= */
+function renderNotifications(){
+  const list = document.getElementById('notifList');
+  const now = new Date();
+  const items = [
+    {tag:'政策',cls:'pill-blue',title:'小规模纳税人减按1%征收率延续至2027年底',body:'财政部 税务总局公告明确，2026年1月1日至2027年12月31日，小规模纳税人3%征收率减按1%。'},
+    {tag:'政策',cls:'pill-green',title:'小型微利企业所得税优惠延续',body:'小型微利企业减按25%计入应纳税所得额、20%税率，实际税负5%，执行至2027年12月31日。'},
+    {tag:'期限',cls:'pill-amber',title:'申报期限提醒',body:'增值税、附加税费通常按月/季申报；企业所得税按月/季预缴。请根据主管税务机关确定的期限及时申报（演示提醒）。'},
+    {tag:'风险',cls:'pill-red',title:'两税收入差异>10%为常见预警项',body:'金税四期下增值税销售额与企业所得税收入差异超过10%易触发预警，需准备差异说明台账。'},
+    {tag:'风险',cls:'pill-purple',title:'工资、个税、社保三方数据一致性',body:'工资薪金总额、个税申报额、社保缴费基数差异超过10%是常见风险指标，建议定期核对。'},
+  ];
+  list.innerHTML = items.map(i=>`<li><span class="tag pill ${i.cls}">${i.tag}</span><div><strong>${i.title}</strong><br><span class="small muted">${i.body}</span></div></li>`).join('');
+}
+
+/* ================= 事件绑定 ================= */
+document.getElementById('btn-saveEnterprise').addEventListener('click',()=>{
+  readForm();
+  calcResult = compute();
+  renderCalculation(); renderPolicy(); renderRisk(); renderDeclaration();
+  document.getElementById('topStatus').textContent = '数据已保存 · '+new Date().toLocaleTimeString('zh-CN');
+  toast('企业数据已保存并完成计算');
+});
+document.getElementById('btn-resetDemo').addEventListener('click',()=>{
+  state = Object.assign({}, demo);
+  adjustments = {vat:0,cit:0};
+  save(); fillForm(); calcResult = compute();
+  renderCalculation(); renderPolicy(); renderRisk(); renderDeclaration();
+  toast('已恢复演示数据');
+});
+document.getElementById('btn-applyAdj').addEventListener('click',()=>{
+  adjustments.vat = num('adj-vat');
+  adjustments.cit = num('adj-cit');
+  state.adjVat = adjustments.vat; state.adjCit = adjustments.cit; state.adjNote = document.getElementById('adj-note').value;
+  save(); calcResult = compute();
+  renderCalculation(); renderRisk(); renderDeclaration(); renderPolicy();
+  toast('复核调整已应用');
+});
+
+/* 初始化 */
+fillForm();
+calcResult = compute();
+renderCalculation();
+renderPolicy();
+renderRisk();
+renderDeclaration();
+</script>
+</body>
+</html>
